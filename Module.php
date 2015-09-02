@@ -1,12 +1,12 @@
 <?php
 
-namespace Octo\GoogleAnalytics;
+namespace Octo\Azure;
 
 class Module extends \Octo\Module
 {
     protected function getName()
     {
-        return 'GoogleAnalytics';
+        return 'Azure';
     }
 
     protected function getPath()
