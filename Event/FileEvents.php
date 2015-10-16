@@ -28,15 +28,23 @@ class FileEvents extends Listener
                 $this->container = $config['Container'];
             }
 
-            $this->blobProxy = ServicesBuilder::getInstance()->createBlobService($config['ConnectionString']);
-
             $manager->registerListener('GetFile', array($this, 'getFile'), false);
             $manager->registerListener('PutFile', array($this, 'putFile'), false);
         }
     }
 
+    protected function init()
+    {
+        if (empty($this->blobProxy)) {
+            $config = Config::getInstance()->get('Octo.Azure.BlobStorage');
+            $this->blobProxy = ServicesBuilder::getInstance()->createBlobService($config['ConnectionString']);
+        }
+    }
+
     public function getFile(array &$file, &$continue)
     {
+        $this->init();
+
         try {
             $blob = $this->blobProxy->getBlob($this->container, $file['id']);
             $file['data'] = stream_get_contents($blob->getContentStream());
@@ -48,6 +56,8 @@ class FileEvents extends Listener
 
     public function putFile(array &$file, &$continue)
     {
+        $this->init();
+
         try {
             $this->blobProxy->createBlockBlob($this->container, $file['id'], $file['data']);
         } catch (ServiceException $ex) {
